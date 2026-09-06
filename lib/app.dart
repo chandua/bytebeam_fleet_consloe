@@ -1,9 +1,10 @@
-import 'package:bytebeam_fleet_consloe/provider/database_providers.dart';
+import 'package:bytebeam_fleet_consloe/providers/database_providers.dart';
 import 'package:bytebeam_fleet_consloe/ui/router.dart';
-import 'package:bytebeam_fleet_consloe/ui/theme/app_theme.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'ui/theme/app_theme.dart';
 
 class FleetApp extends ConsumerWidget {
   const FleetApp({super.key});

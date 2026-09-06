@@ -1,9 +1,10 @@
-import 'package:fleet_console/core/constants.dart';
-import 'package:fleet_console/core/sql.dart';
-import 'package:fleet_console/data/database/fleet_database.dart';
-import 'package:fleet_console/data/database/schema.dart';
-import 'package:fleet_console/domain/models/vehicle.dart';
-import 'package:fleet_console/domain/models/vehicle_status.dart';
+
+import 'package:bytebeam_fleet_consloe/core/constants.dart';
+import 'package:bytebeam_fleet_consloe/core/sql.dart';
+import 'package:bytebeam_fleet_consloe/data/database/fleet_database.dart';
+import 'package:bytebeam_fleet_consloe/data/database/schema.dart';
+import 'package:bytebeam_fleet_consloe/domain/models/vehicle.dart';
+import 'package:bytebeam_fleet_consloe/domain/models/vehicle_status.dart';
 import 'package:uuid/uuid.dart';
 
 class VehicleRepository {

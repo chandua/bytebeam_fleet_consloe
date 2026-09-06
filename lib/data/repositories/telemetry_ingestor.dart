@@ -1,10 +1,12 @@
-import 'package:fleet_console/data/repositories/alert_repository.dart';
-import 'package:fleet_console/data/repositories/geofence_repository.dart';
-import 'package:fleet_console/data/repositories/telemetry_repository.dart';
-import 'package:fleet_console/data/repositories/trip_repository.dart';
-import 'package:fleet_console/domain/models/signal.dart';
-import 'package:fleet_console/domain/services/alert_engine.dart';
-import 'package:fleet_console/domain/services/geofence_engine.dart';
+import 'package:bytebeam_fleet_consloe/data/repositories/alert_repository.dart';
+import 'package:bytebeam_fleet_consloe/data/repositories/telemetry_repository.dart';
+import 'package:bytebeam_fleet_consloe/data/repositories/trip_repository.dart';
+
+
+import '../../domain/models/signal.dart';
+import '../../domain/services/alert_engine.dart';
+import '../../domain/services/geofence_engine.dart';
+import 'geofence_repository.dart';
 
 /// Single write path: telemetry → DuckDB, then derive alerts / fences / trips.
 class TelemetryIngestor {

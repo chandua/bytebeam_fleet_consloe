@@ -1,6 +1,5 @@
+import 'package:bytebeam_fleet_consloe/domain/models/vehicle_status.dart';
 import 'package:flutter/material.dart';
-
-import '../../domin/model/vehicle_status.dart' show VehicleStatus;
 
 class StatusChip extends StatelessWidget {
   const StatusChip({super.key, required this.status});

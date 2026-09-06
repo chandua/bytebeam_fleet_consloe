@@ -1,7 +1,8 @@
-import 'package:fleet_console/core/sql.dart';
-import 'package:fleet_console/data/database/fleet_database.dart';
-import 'package:fleet_console/domain/models/geofence.dart';
-import 'package:fleet_console/domain/services/geofence_engine.dart';
+
+import 'package:bytebeam_fleet_consloe/core/sql.dart';
+import 'package:bytebeam_fleet_consloe/data/database/fleet_database.dart';
+import 'package:bytebeam_fleet_consloe/domain/models/geofence.dart';
+import 'package:bytebeam_fleet_consloe/domain/services/geofence_engine.dart';
 import 'package:uuid/uuid.dart';
 
 class GeofenceRepository {

@@ -4,6 +4,7 @@ import 'package:bytebeam_fleet_consloe/core/constants.dart';
 import 'package:bytebeam_fleet_consloe/data/database/fleet_database.dart';
 import 'package:bytebeam_fleet_consloe/data/repositories/telemetry_repository.dart';
 import 'package:bytebeam_fleet_consloe/data/repositories/vehicle_repository.dart';
+import 'package:bytebeam_fleet_consloe/domain/models/signal.dart';
 
 import 'package:uuid/uuid.dart';
 

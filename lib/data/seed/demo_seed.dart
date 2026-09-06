@@ -1,17 +1,16 @@
 import 'dart:math';
 
+import 'package:bytebeam_fleet_consloe/core/constants.dart';
+import 'package:bytebeam_fleet_consloe/core/sql.dart';
 import 'package:bytebeam_fleet_consloe/data/database/fleet_database.dart';
-import 'package:fleet_console/core/constants.dart';
-import 'package:fleet_console/core/sql.dart';
-import 'package:fleet_console/data/database/fleet_database.dart';
-import 'package:fleet_console/data/repositories/alert_repository.dart';
-import 'package:fleet_console/data/repositories/geofence_repository.dart';
-import 'package:fleet_console/data/repositories/telemetry_repository.dart';
-import 'package:fleet_console/data/repositories/trip_repository.dart';
-import 'package:fleet_console/data/repositories/vehicle_repository.dart';
-import 'package:fleet_console/domain/models/signal.dart';
-import 'package:fleet_console/domain/services/alert_engine.dart';
-import 'package:fleet_console/domain/services/geofence_engine.dart';
+import 'package:bytebeam_fleet_consloe/data/repositories/alert_repository.dart';
+import 'package:bytebeam_fleet_consloe/data/repositories/geofence_repository.dart';
+import 'package:bytebeam_fleet_consloe/data/repositories/telemetry_repository.dart';
+import 'package:bytebeam_fleet_consloe/data/repositories/trip_repository.dart';
+import 'package:bytebeam_fleet_consloe/data/repositories/vehicle_repository.dart';
+import 'package:bytebeam_fleet_consloe/domain/models/signal.dart';
+import 'package:bytebeam_fleet_consloe/domain/services/alert_engine.dart';
+import 'package:bytebeam_fleet_consloe/domain/services/geofence_engine.dart';
 import 'package:uuid/uuid.dart';
 
 /// Seeds a small, realistic demo fleet the first time the DB is empty.

@@ -1,7 +1,11 @@
 
 import 'package:bytebeam_fleet_consloe/core/sql.dart';
 import 'package:bytebeam_fleet_consloe/data/database/fleet_database.dart';
+import 'package:bytebeam_fleet_consloe/domain/models/alert.dart';
+import 'package:bytebeam_fleet_consloe/domain/models/signal.dart';
 import 'package:uuid/uuid.dart';
+
+import '../../domain/services/alert_engine.dart' show AlertEngine, AlertIntent, SignalSnapshot;
 
 class AlertRepository {
   AlertRepository(this._db, {DateTime Function()? clock})

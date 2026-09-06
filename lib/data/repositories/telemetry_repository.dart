@@ -1,8 +1,9 @@
-import 'package:fleet_console/core/constants.dart';
-import 'package:fleet_console/core/sql.dart';
-import 'package:fleet_console/data/database/fleet_database.dart';
-import 'package:fleet_console/domain/models/signal.dart';
-import 'package:fleet_console/domain/services/signal_verdict.dart';
+
+import 'package:bytebeam_fleet_consloe/core/constants.dart';
+import 'package:bytebeam_fleet_consloe/core/sql.dart';
+import 'package:bytebeam_fleet_consloe/data/database/fleet_database.dart';
+import 'package:bytebeam_fleet_consloe/domain/models/signal.dart';
+import 'package:bytebeam_fleet_consloe/domain/services/signal_verdict.dart';
 import 'package:uuid/uuid.dart';
 
 class TelemetryRepository {

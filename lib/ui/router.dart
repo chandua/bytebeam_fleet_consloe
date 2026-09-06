@@ -1,8 +1,8 @@
-import 'package:bytebeam_fleet_consloe/ui/screen/fleet_home_screen.dart';
-import 'package:bytebeam_fleet_consloe/ui/screen/geofences_screen.dart';
-import 'package:bytebeam_fleet_consloe/ui/screen/trips_screen.dart';
-import 'package:bytebeam_fleet_consloe/ui/screen/vehicle_detail_screen.dart';
 
+import 'package:bytebeam_fleet_consloe/ui/screens/fleet_home_screen.dart';
+import 'package:bytebeam_fleet_consloe/ui/screens/geofences_screen.dart';
+import 'package:bytebeam_fleet_consloe/ui/screens/trips_screen.dart';
+import 'package:bytebeam_fleet_consloe/ui/screens/vehicle_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
