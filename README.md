@@ -67,6 +67,10 @@ Re-run locally:
 flutter test tool/measure_scale_manual_test.dart
 ```
 
+## AI conversation logs
+
+Uncurated Cursor agent transcripts (including dead ends and corrections) live in [`docs/ai-logs/`](docs/ai-logs/).
+
 ## Cut scope (if any)
 
 Nothing core was dropped: fleet list, detail, alerts+undo, geofences, trips, seed data, scale action, and domain tests are in. Optional APK and a polished map UI were skipped in favor of correctness of the local-first path.
