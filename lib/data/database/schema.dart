@@ -96,7 +96,10 @@ abstract final class FleetSchema {
   ];
 
   /// Latest numeric/bool-ish signals per vehicle, pivoted for the fleet list.
-  static String fleetListSql({required String nowIso, required int offlineMinutes}) => '''
+  ///
+  /// Offline cutoff is computed in Dart — DuckDB 1.4 on iOS cannot autoload
+  /// `core_functions` (`epoch_ms` / `date_diff`), so we only use timestamp `<`.
+  static String fleetListSql({required String offlineBeforeIso}) => '''
     WITH latest AS (
       SELECT vehicle_id, signal, value, event_time,
              ROW_NUMBER() OVER (
@@ -138,8 +141,7 @@ abstract final class FleetSchema {
         g.name AS geofence_name,
         CASE
           WHEN p.last_ping IS NULL
-            OR epoch_ms(TIMESTAMP '$nowIso') - epoch_ms(p.last_ping)
-               > ${offlineMinutes * 60 * 1000}
+            OR p.last_ping < TIMESTAMP '$offlineBeforeIso'
             THEN 'OFFLINE'
           WHEN COALESCE(p.speed, 0) > 0 THEN 'MOVING'
           WHEN COALESCE(p.ignition, 0) = 1 THEN 'IDLE'

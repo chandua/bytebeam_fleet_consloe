@@ -108,7 +108,12 @@ class FleetHomeScreen extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
             child: counts.when(
               loading: () => const SizedBox(height: 40),
-              error: (e, _) => Text('Counts failed: $e'),
+              error: (e, _) => Text(
+                'Counts failed: $e',
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
               data: (c) => SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -160,7 +165,17 @@ class FleetHomeScreen extends ConsumerWidget {
           Expanded(
             child: list.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, st) => Center(child: Text('Failed to load fleet\n$e')),
+              error: (e, st) => ListView(
+                padding: const EdgeInsets.all(24),
+                children: [
+                  Text(
+                    'Failed to load fleet',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  SelectableText('$e'),
+                ],
+              ),
               data: (items) {
                 if (items.isEmpty) {
                   return const _EmptyFleet();

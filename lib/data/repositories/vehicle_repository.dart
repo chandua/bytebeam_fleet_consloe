@@ -35,37 +35,35 @@ class VehicleRepository {
   }
 
   Future<FleetFilterCounts> filterCounts() async {
-    final now = _clock().toUtc();
-    final base = FleetSchema.fleetListSql(
-      nowIso: now.toIso8601String(),
-      offlineMinutes: FleetConstants.offlineAfter.inMinutes,
-    );
-    final rows = await _db.fetchAll('''
-      $base
-      SELECT
-        COUNT(*) AS all_count,
-        SUM(CASE WHEN status = 'MOVING' THEN 1 ELSE 0 END) AS moving,
-        SUM(CASE WHEN status = 'IDLE' THEN 1 ELSE 0 END) AS idle,
-        SUM(CASE WHEN status = 'STOPPED' THEN 1 ELSE 0 END) AS stopped,
-        SUM(CASE WHEN status = 'OFFLINE' THEN 1 ELSE 0 END) AS offline
-      FROM ranked
-    ''');
-    if (rows.isEmpty) return const FleetFilterCounts();
-    final r = rows.first;
+    // Derive from the same list SQL so we never need SUM() (core_functions).
+    final items = await list();
+    var moving = 0, idle = 0, stopped = 0, offline = 0;
+    for (final item in items) {
+      switch (item.status) {
+        case VehicleStatus.moving:
+          moving++;
+        case VehicleStatus.idle:
+          idle++;
+        case VehicleStatus.stopped:
+          stopped++;
+        case VehicleStatus.offline:
+          offline++;
+      }
+    }
     return FleetFilterCounts(
-      all: (r[0] as num?)?.toInt() ?? 0,
-      moving: (r[1] as num?)?.toInt() ?? 0,
-      idle: (r[2] as num?)?.toInt() ?? 0,
-      stopped: (r[3] as num?)?.toInt() ?? 0,
-      offline: (r[4] as num?)?.toInt() ?? 0,
+      all: items.length,
+      moving: moving,
+      idle: idle,
+      stopped: stopped,
+      offline: offline,
     );
   }
 
   Future<List<VehicleListItem>> list({VehicleStatus? filter}) async {
     final now = _clock().toUtc();
+    final offlineBefore = now.subtract(FleetConstants.offlineAfter);
     final base = FleetSchema.fleetListSql(
-      nowIso: now.toIso8601String(),
-      offlineMinutes: FleetConstants.offlineAfter.inMinutes,
+      offlineBeforeIso: sqlTimestampLiteral(offlineBefore),
     );
     final where = filter == null
         ? ''

@@ -44,6 +44,13 @@ class FleetDatabase {
   }
 
   Future<void> _migrate() async {
+    // iOS XCFramework ships core_functions statically linked, but does not
+    // autoload it (autoload tries to fetch .duckdb_extension and fails).
+    try {
+      await _conn.execute('LOAD core_functions');
+    } catch (_) {
+      // Older desktop builds may already have these builtins; ignore.
+    }
     for (final stmt in FleetSchema.createStatements) {
       await _conn.execute(stmt);
     }

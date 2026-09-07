@@ -29,9 +29,9 @@ require 'fileutils'
 
 flutter_ios_podfile_setup
 
-# dart_duckdb's upstream prepare_command often 404s on GitHub. Prefetch the
-# last published iOS framework into the resolved plugin path before pods run.
-def ensure_duckdb_ios_framework!
+# Prefetch duckdb.xcframework (device + simulator). Upstream .framework is
+# device-only and fails: "Building for iOS-simulator, but linking in dylib… iOS".
+def ensure_duckdb_ios_xcframework!
   plugins_path = File.expand_path(File.join('..', '.flutter-plugins-dependencies'), __FILE__)
   return unless File.exist?(plugins_path)
 
@@ -40,33 +40,32 @@ def ensure_duckdb_ios_framework!
   return if duckdb.nil?
 
   ios_dir = File.join(duckdb['path'], 'ios')
+  release_dir = File.join(ios_dir, 'Libraries', 'release')
+  xcframework_dir = File.join(release_dir, 'duckdb.xcframework')
   puts "dart_duckdb iOS plugin path: #{ios_dir}"
 
-  working_url = 'https://github.com/TigerEyeLabs/duckdb-dart/releases/download/v1.4.2/duckdb-framework-ios.zip'
-  podspec = File.join(ios_dir, 'dart_duckdb.podspec')
-  if File.exist?(podspec)
-    text = File.read(podspec)
-    patched = text.gsub(
-      %r{https://github.com/TigerEyeLabs/duckdb-dart/releases/download/v[\d.]+/duckdb-framework-ios.zip},
-      working_url
-    ).gsub('curl -L -o', 'curl -fL -o')
-    File.write(podspec, patched) if patched != text
-  end
+  # Drop stale device-only framework so CocoaPods cannot link it for simulator.
+  stale = File.join(release_dir, 'duckdb.framework')
+  FileUtils.rm_rf(stale) if File.exist?(stale)
 
-  release_dir = File.join(ios_dir, 'Libraries', 'release')
-  framework_dir = File.join(release_dir, 'duckdb.framework')
-  return if File.directory?(framework_dir)
+  return if File.directory?(xcframework_dir)
 
   FileUtils.mkdir_p(release_dir)
-  zip_path = File.join(ios_dir, 'duckdb-framework-ios.zip')
-  puts "Prefetching DuckDB iOS framework from #{working_url}"
-  system('curl', '-fL', '-o', zip_path, working_url) or raise 'Failed to download duckdb-framework-ios.zip'
-  system('unzip', '-o', zip_path, '-d', release_dir) or raise 'Failed to unzip duckdb-framework-ios.zip'
+  url = 'https://github.com/yharby/duckdb-dart/releases/download/v1.4.3-ios/duckdb-xcframework-ios.zip'
+  zip_path = File.join(ios_dir, 'duckdb-xcframework-ios.zip')
+  puts "Prefetching DuckDB iOS XCFramework from #{url}"
+  system('curl', '-fL', '-o', zip_path, url) or raise 'Failed to download duckdb-xcframework-ios.zip'
+  system('unzip', '-o', zip_path, '-d', release_dir) or raise 'Failed to unzip duckdb-xcframework-ios.zip'
   FileUtils.rm_f(zip_path)
-  raise 'duckdb.framework missing after unzip' unless File.directory?(framework_dir)
+
+  unless File.directory?(xcframework_dir)
+    found = Dir.glob(File.join(release_dir, '**/duckdb.xcframework')).first
+    FileUtils.mv(found, xcframework_dir) if found && found != xcframework_dir
+  end
+  raise 'duckdb.xcframework missing after unzip' unless File.directory?(xcframework_dir)
 end
 
-ensure_duckdb_ios_framework!
+ensure_duckdb_ios_xcframework!
 
 target 'Runner' do
   use_frameworks!

@@ -1,15 +1,14 @@
 #
 # To learn more about a Podspec see http://guides.cocoapods.org/syntax/podspec.html.
-# Run `pod lib lint duckdb.podspec' to validate before publishing.
 #
 Pod::Spec.new do |s|
   s.name             = 'dart_duckdb'
   s.version          = File.read(File.join('..', 'pubspec.yaml')).match(/version:\s+(\d+\.\d+\.\d+)/)[1]
-  s.summary          = 'A new flutter plugin project.'
+  s.summary          = 'DuckDB embedded database for Flutter iOS.'
   s.description      = <<-DESC
-A new flutter plugin project.
+DuckDB for Flutter iOS. Uses an XCFramework with device + simulator slices.
                         DESC
-  s.homepage         = 'https://tigereye.com'
+  s.homepage         = 'https://github.com/TigerEyeLabs/duckdb-dart'
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Tigereye' => 'email@example.com' }
   s.source           = { :path => '.' }
@@ -20,18 +19,30 @@ A new flutter plugin project.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
   s.swift_version = '5.0'
 
-  s.ios.vendored_framework = 'Libraries/release/duckdb.framework'
+  # Device-only .framework fails simulator linking; XCFramework has both.
+  s.ios.vendored_frameworks = 'Libraries/release/duckdb.xcframework'
 
-  # Use a pre-install hook to check if the library exists
+  # Upstream TigerEyeLabs zips are device-only / missing tags. Use the
+  # community XCFramework release that includes ios-arm64-simulator.
   s.prepare_command = <<-CMD
-    mkdir -p Libraries/release  # Ensure the directory exists
-    if [ ! -d "Libraries/release/duckdb.framework" ]; then
-      echo "Downloading DuckDB library..."
-      curl -fL -o duckdb-framework-ios.zip "https://github.com/TigerEyeLabs/duckdb-dart/releases/download/v1.4.2/duckdb-framework-ios.zip"
-      unzip -o duckdb-framework-ios.zip -d Libraries/release/
-      rm duckdb-framework-ios.zip
+    set -e
+    mkdir -p Libraries/release
+    if [ ! -d "Libraries/release/duckdb.xcframework" ]; then
+      echo "Downloading DuckDB iOS XCFramework (v1.4.3-ios)..."
+      curl -fL -o duckdb-xcframework-ios.zip \\
+        "https://github.com/yharby/duckdb-dart/releases/download/v1.4.3-ios/duckdb-xcframework-ios.zip"
+      unzip -o duckdb-xcframework-ios.zip -d Libraries/release/
+      rm duckdb-xcframework-ios.zip
+      # Zip may nest the xcframework one level deeper.
+      if [ ! -d "Libraries/release/duckdb.xcframework" ]; then
+        found=$(find Libraries/release -type d -name 'duckdb.xcframework' | head -1)
+        if [ -n "$found" ] && [ "$found" != "Libraries/release/duckdb.xcframework" ]; then
+          mv "$found" Libraries/release/duckdb.xcframework
+        fi
+      fi
     else
-      echo "DuckDB library already exists."
+      echo "DuckDB XCFramework already exists."
     fi
+    test -d "Libraries/release/duckdb.xcframework"
   CMD
 end
