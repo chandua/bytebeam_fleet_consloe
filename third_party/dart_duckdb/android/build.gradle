@@ -54,9 +54,11 @@ android {
 
 def jniLibsDir = "$projectDir/src/main/jniLibs"
 
+// Upstream 1.4.1/1.4.4 Android assets 404; v1.4.2 publishes the .so zips.
+def duckDbRelease = 'v1.4.2'
 def zipFiles = [
-    'arm64-v8a': 'https://github.com/TigerEyeLabs/duckdb-dart/releases/download/v1.4.1/libduckdb-android_arm64-v8a.zip',
-    'armeabi-v7a': 'https://github.com/TigerEyeLabs/duckdb-dart/releases/download/v1.4.1/libduckdb-android_armeabi-v7a.zip'
+    'arm64-v8a': "https://github.com/TigerEyeLabs/duckdb-dart/releases/download/${duckDbRelease}/libduckdb-android_arm64-v8a.zip",
+    'armeabi-v7a': "https://github.com/TigerEyeLabs/duckdb-dart/releases/download/${duckDbRelease}/libduckdb-android_armeabi-v7a.zip"
 ]
 
 task downloadAndExtractDuckDB {
@@ -64,32 +66,58 @@ task downloadAndExtractDuckDB {
         zipFiles.each { abi, url ->
             def libDir = file("$jniLibsDir/$abi")
             def libFile = file("$libDir/libduckdb.so")
-            if (!libFile.exists()) {
-                def tmpDir = file("$buildDir/tmp")
-                tmpDir.mkdirs()
-                def zipFile = file("$tmpDir/duckdb-${abi}.zip")
-
-                // Ensure the jniLibs directory for this ABI exists
-                libDir.mkdirs()
-
-                // Download the zip file
-                println "Downloading $url"
-                new URL(url).withInputStream { i ->
-                    zipFile.withOutputStream { it << i }
-                }
-
-                // Extract the zip file
-                println "Extracting to $libDir"
-                copy {
-                    from zipTree(zipFile)
-                    into libDir
-                    include "*.so"
-                }
-
-                // Clean up the zip file
-                delete zipFile
-            } else {
+            if (libFile.exists() && libFile.length() > 1024) {
                 println "Library for $abi already exists, skipping download"
+                return
+            }
+
+            def tmpDir = file("$buildDir/tmp")
+            tmpDir.mkdirs()
+            def zipFile = file("$tmpDir/duckdb-${abi}.zip")
+            libDir.mkdirs()
+
+            println "Downloading $url"
+            def lastError = null
+            for (int attempt = 1; attempt <= 3; attempt++) {
+                try {
+                    def connection = new URL(url).openConnection()
+                    connection.setConnectTimeout(30_000)
+                    connection.setReadTimeout(300_000)
+                    connection.instanceFollowRedirects = true
+                    connection.inputStream.withStream { i ->
+                        zipFile.withOutputStream { it << i }
+                    }
+                    lastError = null
+                    break
+                } catch (Exception e) {
+                    lastError = e
+                    println "Download attempt $attempt failed for $abi: ${e.message}"
+                    if (zipFile.exists()) zipFile.delete()
+                    if (attempt < 3) sleep(2000)
+                }
+            }
+            if (lastError != null) {
+                throw new GradleException(
+                    "Failed to download DuckDB for $abi after 3 attempts from $url. " +
+                    "Place libduckdb.so in android/src/main/jniLibs/$abi/ manually. Cause: ${lastError.message}",
+                    lastError
+                )
+            }
+            if (zipFile.length() < 1024) {
+                zipFile.delete()
+                throw new GradleException("DuckDB download for $abi looks invalid (HTTP body too small) from $url")
+            }
+
+            println "Extracting to $libDir"
+            copy {
+                from zipTree(zipFile)
+                into libDir
+                include "*.so"
+            }
+            delete zipFile
+
+            if (!libFile.exists()) {
+                throw new GradleException("libduckdb.so missing after extract for $abi")
             }
         }
     }
