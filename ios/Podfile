@@ -24,8 +24,37 @@ def flutter_root
 end
 
 require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
+require 'json'
 
 flutter_ios_podfile_setup
+
+# dart_duckdb's podspec prepare_command often points at a missing GitHub asset
+# (e.g. v1.4.1 / v1.4.4 404). Prefetch the last published iOS framework so
+# CocoaPods skips the broken download when Libraries/release/duckdb.framework exists.
+def ensure_duckdb_ios_framework!
+  plugins_path = File.expand_path(File.join('..', '.flutter-plugins-dependencies'), __FILE__)
+  return unless File.exist?(plugins_path)
+
+  plugins = JSON.parse(File.read(plugins_path))
+  duckdb = (plugins.dig('plugins', 'ios') || []).find { |p| p['name'] == 'dart_duckdb' }
+  return if duckdb.nil?
+
+  ios_dir = File.join(duckdb['path'], 'ios')
+  release_dir = File.join(ios_dir, 'Libraries', 'release')
+  framework_dir = File.join(release_dir, 'duckdb.framework')
+  return if File.directory?(framework_dir)
+
+  FileUtils.mkdir_p(release_dir)
+  zip_path = File.join(ios_dir, 'duckdb-framework-ios.zip')
+  url = 'https://github.com/TigerEyeLabs/duckdb-dart/releases/download/v1.4.2/duckdb-framework-ios.zip'
+  puts "Prefetching DuckDB iOS framework from #{url}"
+  system('curl', '-fL', '-o', zip_path, url) or raise 'Failed to download duckdb-framework-ios.zip'
+  system('unzip', '-o', zip_path, '-d', release_dir) or raise 'Failed to unzip duckdb-framework-ios.zip'
+  FileUtils.rm_f(zip_path)
+  raise 'duckdb.framework missing after unzip' unless File.directory?(framework_dir)
+end
+
+ensure_duckdb_ios_framework!
 
 target 'Runner' do
   use_frameworks!

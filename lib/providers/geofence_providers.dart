@@ -2,6 +2,7 @@
 import 'package:bytebeam_fleet_consloe/data/seed/scale_backfill.dart' show ScaleBackfill;
 import 'package:bytebeam_fleet_consloe/domain/models/geofence.dart';
 import 'package:bytebeam_fleet_consloe/domain/models/trip.dart';
+import 'package:bytebeam_fleet_consloe/domain/services/geofence_engine.dart';
 import 'package:bytebeam_fleet_consloe/providers/database_providers.dart';
 import 'package:bytebeam_fleet_consloe/providers/fleet_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -34,20 +35,57 @@ class GeofenceActions {
           lng: lng,
           radiusMeters: radiusMeters,
         );
-    _ref.invalidate(geofenceListProvider);
-    _ref.invalidate(fleetListProvider);
+    await _recomputeAllVehicles();
+    _invalidateFleet();
   }
 
   Future<void> update(Geofence fence) async {
     await _ref.read(geofenceRepositoryProvider).update(fence);
-    _ref.invalidate(geofenceListProvider);
-    _ref.invalidate(fleetListProvider);
+    await _recomputeAllVehicles();
+    _invalidateFleet();
   }
 
   Future<void> deactivate(String id) async {
     await _ref.read(geofenceRepositoryProvider).deactivate(id);
+    await _recomputeAllVehicles();
+    _invalidateFleet();
+  }
+
+  /// Engine docs: re-run retained history after fence create/edit/deactivate.
+  Future<void> _recomputeAllVehicles() async {
+    final vehicleIds = await _ref.read(vehicleRepositoryProvider).listIds();
+    final telemetry = _ref.read(telemetryRepositoryProvider);
+    final geofences = _ref.read(geofenceRepositoryProvider);
+    final trips = _ref.read(tripRepositoryProvider);
+
+    for (final vehicleId in vehicleIds) {
+      final history = await telemetry.locationHistory(vehicleId);
+      final samples = history
+          .map(
+            (p) => LocationSample(
+              lat: p.lat,
+              lng: p.lng,
+              eventTime: p.eventTime,
+              accuracyMeters: p.accuracyMeters,
+            ),
+          )
+          .toList();
+      final transitions = await geofences.recomputeVehicle(
+        vehicleId: vehicleId,
+        samples: samples,
+      );
+      await trips.applyTransitions(
+        vehicleId: vehicleId,
+        confirmed: transitions,
+      );
+    }
+  }
+
+  void _invalidateFleet() {
     _ref.invalidate(geofenceListProvider);
     _ref.invalidate(fleetListProvider);
+    _ref.invalidate(fleetCountsProvider);
+    _ref.invalidate(recentTripsProvider);
   }
 }
 

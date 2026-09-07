@@ -117,10 +117,10 @@ packages:
     dependency: "direct main"
     description:
       name: dart_duckdb
-      sha256: b653f307907f4e0de0404a13985bc78039b45fb09118245c5953e29c60a28688
+      sha256: "04ee3cfb724c63c19170f2c6808eb92880ea37bb903d214e3c114cdc0e39b330"
       url: "https://pub.dev"
     source: hosted
-    version: "1.4.4"
+    version: "1.4.2"
   fake_async:
     dependency: transitive
     description:

@@ -109,6 +109,11 @@ class VehicleRepository {
     );
   }
 
+  Future<List<String>> listIds() async {
+    final rows = await _db.fetchAll('SELECT id FROM vehicles ORDER BY id');
+    return rows.map((r) => r[0]! as String).toList();
+  }
+
   String newId() => _uuid.v4();
 
   DateTime? _asDateTime(Object? value) {

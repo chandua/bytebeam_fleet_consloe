@@ -1,0 +1,22 @@
+PODS:
+  - dart_duckdb (1.4.2):
+    - Flutter
+  - Flutter (1.0.0)
+
+DEPENDENCIES:
+  - dart_duckdb (from `.symlinks/plugins/dart_duckdb/ios`)
+  - Flutter (from `Flutter`)
+
+EXTERNAL SOURCES:
+  dart_duckdb:
+    :path: ".symlinks/plugins/dart_duckdb/ios"
+  Flutter:
+    :path: Flutter
+
+SPEC CHECKSUMS:
+  dart_duckdb: cc1b7a6520181557a18e87f22c173a11867a060d
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+
+PODFILE CHECKSUM: 7ff76a3385a704fafd12e94255bd71fbe925a573
+
+COCOAPODS: 1.16.2
