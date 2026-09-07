@@ -34,9 +34,9 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  # Pin: 1.4.3/1.4.4 podspecs download a missing GitHub asset (v1.4.4 404).
-  # 1.4.2 ships duckdb-framework-ios.zip on the matching release tag.
-  dart_duckdb: 1.4.2
+  # Vendored: upstream 1.4.3/1.4.4 iOS podspecs download a 404 GitHub asset.
+  dart_duckdb:
+    path: third_party/dart_duckdb
   flutter_riverpod: ^3.3.2
   go_router: ^17.5.0
   intl: ^0.20.3

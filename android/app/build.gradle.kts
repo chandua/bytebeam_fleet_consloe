@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.bytebeam.bytebeam_fleet_consloe"
+    namespace = "com.bytebeam.fleet_console"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 

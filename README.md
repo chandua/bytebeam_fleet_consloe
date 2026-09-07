@@ -13,7 +13,7 @@ flutter run -d macos   # or an Android / iOS device
 
 Android is the primary mobile target (`dart_duckdb` ships native binaries). macOS works for local development once the DuckDB dylib is available (CocoaPods `prepare_command` downloads it, or place `libduckdb.dylib` under the package’s `macos/Libraries/release/`).
 
-`dart_duckdb` is pinned to **1.4.2** because 1.4.3/1.4.4 iOS podspecs download a GitHub asset that 404s. The iOS `Podfile` prefetches `duckdb-framework-ios.zip` from the `v1.4.2` release before `pod install`.
+`dart_duckdb` is loaded from `third_party/dart_duckdb` (vendored 1.4.2) because pub.dev 1.4.3/1.4.4 iOS podspecs download a GitHub asset that 404s. The iOS `Podfile` also rewrites/prefetches `duckdb-framework-ios.zip` from the `v1.4.2` release before `pod install`.
 
 ## Tests
 

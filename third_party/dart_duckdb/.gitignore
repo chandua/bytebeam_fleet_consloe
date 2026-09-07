@@ -1,0 +1,5 @@
+# Native binaries are downloaded by CocoaPods prepare_command / Podfile hook.
+ios/Libraries/
+macos/Libraries/
+android/**/libduckdb.so
+*.zip

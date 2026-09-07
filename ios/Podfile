@@ -25,12 +25,12 @@ end
 
 require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
 require 'json'
+require 'fileutils'
 
 flutter_ios_podfile_setup
 
-# dart_duckdb's podspec prepare_command often points at a missing GitHub asset
-# (e.g. v1.4.1 / v1.4.4 404). Prefetch the last published iOS framework so
-# CocoaPods skips the broken download when Libraries/release/duckdb.framework exists.
+# dart_duckdb's upstream prepare_command often 404s on GitHub. Prefetch the
+# last published iOS framework into the resolved plugin path before pods run.
 def ensure_duckdb_ios_framework!
   plugins_path = File.expand_path(File.join('..', '.flutter-plugins-dependencies'), __FILE__)
   return unless File.exist?(plugins_path)
@@ -40,15 +40,27 @@ def ensure_duckdb_ios_framework!
   return if duckdb.nil?
 
   ios_dir = File.join(duckdb['path'], 'ios')
+  puts "dart_duckdb iOS plugin path: #{ios_dir}"
+
+  working_url = 'https://github.com/TigerEyeLabs/duckdb-dart/releases/download/v1.4.2/duckdb-framework-ios.zip'
+  podspec = File.join(ios_dir, 'dart_duckdb.podspec')
+  if File.exist?(podspec)
+    text = File.read(podspec)
+    patched = text.gsub(
+      %r{https://github.com/TigerEyeLabs/duckdb-dart/releases/download/v[\d.]+/duckdb-framework-ios.zip},
+      working_url
+    ).gsub('curl -L -o', 'curl -fL -o')
+    File.write(podspec, patched) if patched != text
+  end
+
   release_dir = File.join(ios_dir, 'Libraries', 'release')
   framework_dir = File.join(release_dir, 'duckdb.framework')
   return if File.directory?(framework_dir)
 
   FileUtils.mkdir_p(release_dir)
   zip_path = File.join(ios_dir, 'duckdb-framework-ios.zip')
-  url = 'https://github.com/TigerEyeLabs/duckdb-dart/releases/download/v1.4.2/duckdb-framework-ios.zip'
-  puts "Prefetching DuckDB iOS framework from #{url}"
-  system('curl', '-fL', '-o', zip_path, url) or raise 'Failed to download duckdb-framework-ios.zip'
+  puts "Prefetching DuckDB iOS framework from #{working_url}"
+  system('curl', '-fL', '-o', zip_path, working_url) or raise 'Failed to download duckdb-framework-ios.zip'
   system('unzip', '-o', zip_path, '-d', release_dir) or raise 'Failed to unzip duckdb-framework-ios.zip'
   FileUtils.rm_f(zip_path)
   raise 'duckdb.framework missing after unzip' unless File.directory?(framework_dir)
